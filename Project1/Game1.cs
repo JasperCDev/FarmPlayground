@@ -11,11 +11,15 @@ namespace Project1
         public static RenderTarget2D renderTarget;
 
         private Texture2D testSprite;
+        private Texture2D grassSprite;
 
         static int windowWidth = 2560;
         static int windowHeight = 1440;
         static int targetWidth = 640;
         static int targetHeight = 360;
+        static int gridWidth = 40;
+        static int gridHeight = 22;
+        static int tileSize = 16;
         static int renderScale = Game1.windowHeight / Game1.targetHeight;
         public Game1()
         {
@@ -37,6 +41,7 @@ namespace Project1
         {
             _spriteBatch = new SpriteBatch(GraphicsDevice);
             testSprite = Content.Load<Texture2D>("checkered_sprite");
+            grassSprite = Content.Load<Texture2D>("grass");
         }
 
         protected override void Update(GameTime gameTime)
@@ -54,8 +59,13 @@ namespace Project1
             GraphicsDevice.SetRenderTarget(renderTarget);
             GraphicsDevice.Clear(Color.CornflowerBlue);
             _spriteBatch.Begin();
-            _spriteBatch.Draw(this.testSprite, Vector2.Zero, Color.White);
-
+            for (int row = 0; row < Game1.gridHeight; row++)
+            {
+                for (int col = 0; col < Game1.gridWidth; col++)
+                {
+                    _spriteBatch.Draw(this.grassSprite, new Vector2(Game1.tileSize * col, Game1.tileSize * row + 4), Color.White);
+                }
+            }
             _spriteBatch.End();
             base.Draw(gameTime);
 
