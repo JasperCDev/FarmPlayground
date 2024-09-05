@@ -1,4 +1,5 @@
-﻿using Microsoft.Xna.Framework;
+﻿using FarmProject.src;
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 
@@ -10,17 +11,18 @@ namespace Project1
         private SpriteBatch _spriteBatch;
         public static RenderTarget2D renderTarget;
 
-        private Texture2D testSprite;
-        private Texture2D grassSprite;
+        public static Texture2D testSprite;
+        public static Texture2D grassSprite;
+        public static Texture2D soilSprite;
 
-        static int windowWidth = 2560;
-        static int windowHeight = 1440;
-        static int targetWidth = 640;
-        static int targetHeight = 360;
-        static int gridWidth = 40;
-        static int gridHeight = 22;
-        static int tileSize = 16;
-        static int renderScale = Game1.windowHeight / Game1.targetHeight;
+        public static readonly int WINDOW_WIDTH = 2560;
+        public static readonly int WINDOW_HEIGHT = 1440;
+        public static readonly int TARGET_WIDTH = 640;
+        public static readonly int TARGET_HEIGHT = 360;
+        public static readonly int RENDER_SCALE = Game1.WINDOW_HEIGHT / Game1.TARGET_HEIGHT;
+        
+        private Grid grid = new();
+        public static InputManager inputManager = new InputManager();
         public Game1()
         {
             _graphics = new GraphicsDeviceManager(this);
@@ -31,10 +33,10 @@ namespace Project1
         protected override void Initialize()
         {
             base.Initialize();
-            this._graphics.PreferredBackBufferWidth = Game1.windowWidth;
-            this._graphics.PreferredBackBufferHeight = Game1.windowHeight;
+            this._graphics.PreferredBackBufferWidth = Game1.WINDOW_WIDTH;
+            this._graphics.PreferredBackBufferHeight = Game1.WINDOW_HEIGHT;
             this._graphics.ApplyChanges();
-            renderTarget = new RenderTarget2D(GraphicsDevice, Game1.targetWidth, Game1.targetHeight);
+            renderTarget = new RenderTarget2D(GraphicsDevice, Game1.TARGET_WIDTH, Game1.TARGET_HEIGHT);
         }
 
         protected override void LoadContent()
@@ -42,14 +44,15 @@ namespace Project1
             _spriteBatch = new SpriteBatch(GraphicsDevice);
             testSprite = Content.Load<Texture2D>("checkered_sprite");
             grassSprite = Content.Load<Texture2D>("grass");
+            soilSprite = Content.Load<Texture2D>("soil");
         }
 
         protected override void Update(GameTime gameTime)
         {
             if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
                 Exit();
-
-            // TODO: Add your update logic here
+            Game1.inputManager.Update(gameTime);
+            this.grid.Update(gameTime);
 
             base.Update(gameTime);
         }
@@ -59,13 +62,7 @@ namespace Project1
             GraphicsDevice.SetRenderTarget(renderTarget);
             GraphicsDevice.Clear(Color.CornflowerBlue);
             _spriteBatch.Begin();
-            for (int row = 0; row < Game1.gridHeight; row++)
-            {
-                for (int col = 0; col < Game1.gridWidth; col++)
-                {
-                    _spriteBatch.Draw(this.grassSprite, new Vector2(Game1.tileSize * col, Game1.tileSize * row + 4), Color.White);
-                }
-            }
+            this.grid.Draw(_spriteBatch);
             _spriteBatch.End();
             base.Draw(gameTime);
 
@@ -80,7 +77,7 @@ namespace Project1
                 color: Color.White,
                 rotation: 0f,
                 origin: Vector2.Zero,
-                scale: Game1.renderScale,
+                scale: Game1.RENDER_SCALE,
                 effects: SpriteEffects.None,
                 layerDepth: 0f
             );
